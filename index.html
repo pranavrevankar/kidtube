@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>KidTube</title>
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Video Player Section -->
+    <div id="player-section" class="player-section hidden">
+      <button id="close-player" class="close-button">&times;</button>
+      <div id="player"></div>
+    </div>
+
+    <!-- Video Gallery Section -->
+    <div id="gallery-section" class="gallery-section">
+      <header class="header">
+        <h1>KidTube</h1>
+      </header>
+
+      <div id="video-grid" class="video-grid">
+        <!-- Videos will be loaded here -->
+      </div>
+
+      <div id="empty-state" class="empty-state hidden">
+        <p>No videos available yet</p>
+        <small>Ask your parent to add some videos</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="/public/script.js"></script>
+</body>
+</html>

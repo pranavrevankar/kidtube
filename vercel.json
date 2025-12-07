@@ -2,14 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "cms/**",
-      "use": "@vercel/static"
-    },
-    {
       "src": "api/index.js",
       "use": "@vercel/node"
     }
@@ -24,12 +16,12 @@
       "dest": "/cms/$1"
     },
     {
-      "src": "/(.*\\.(js|css|jpg|png|svg|ico|html))",
+      "src": "/public/(.*)",
       "dest": "/public/$1"
     },
     {
       "src": "/",
-      "dest": "/public/index.html"
+      "dest": "/index.html"
     }
   ]
 }
