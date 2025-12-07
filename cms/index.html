@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KidTube - CMS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>KidTube - Video Management</h1>
+      <p class="subtitle">Add and manage YouTube videos for your little one</p>
+    </header>
+
+    <div class="add-video-section">
+      <h2>Add New Video</h2>
+      <form id="add-video-form">
+        <div class="form-group">
+          <label for="video-url">YouTube Video URL or ID:</label>
+          <input
+            type="text"
+            id="video-url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            required
+          >
+          <small>Paste the full YouTube URL or just the video ID</small>
+        </div>
+        <div class="form-group">
+          <label for="video-title">Video Title (optional):</label>
+          <input
+            type="text"
+            id="video-title"
+            placeholder="Leave empty to auto-fetch from YouTube"
+          >
+          <small>If left blank, the title will be automatically fetched from YouTube</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Video</button>
+      </form>
+      <div id="message" class="message"></div>
+    </div>
+
+    <div class="video-list-section">
+      <h2>Current Videos (<span id="video-count">0</span>)</h2>
+      <div id="video-list" class="video-grid"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
