@@ -1,36 +1,24 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 const https = require('https');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/cms', express.static('cms'));
-
-// Data file path
-const dataFile = path.join(__dirname, 'data', 'videos.json');
-
-// Helper function to read videos
-function readVideos() {
-  try {
-    const data = fs.readFileSync(dataFile, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-}
-
-// Helper function to write videos
-function writeVideos(videos) {
-  fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2));
-}
 
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
@@ -77,86 +65,153 @@ function fetchVideoTitle(videoId) {
 // API Routes
 
 // Get all videos
-app.get('/api/videos', (req, res) => {
-  const videos = readVideos();
-  res.json(videos);
+app.get('/api/videos', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .order('added_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Format response to match frontend expectations
+    const videos = data.map(video => ({
+      id: video.youtube_video_id,
+      title: video.title,
+      addedAt: video.added_at
+    }));
+
+    res.json(videos);
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    res.status(500).json({ error: 'Failed to fetch videos' });
+  }
 });
 
 // Add a new video
 app.post('/api/videos', async (req, res) => {
-  const { url, title } = req.body;
+  try {
+    const { url, title } = req.body;
 
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required' });
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    const videoId = extractVideoId(url);
+    if (!videoId) {
+      return res.status(400).json({ error: 'Invalid YouTube URL' });
+    }
+
+    // Check if video already exists
+    const { data: existing } = await supabase
+      .from('videos')
+      .select('youtube_video_id')
+      .eq('youtube_video_id', videoId)
+      .single();
+
+    if (existing) {
+      return res.status(400).json({ error: 'Video already exists' });
+    }
+
+    // Fetch video title from YouTube if not provided
+    let videoTitle = title;
+    if (!videoTitle || videoTitle.trim() === '') {
+      videoTitle = await fetchVideoTitle(videoId);
+    }
+
+    // Insert video into Supabase
+    const { data, error } = await supabase
+      .from('videos')
+      .insert([
+        {
+          youtube_video_id: videoId,
+          title: videoTitle
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Format response
+    const newVideo = {
+      id: data.youtube_video_id,
+      title: data.title,
+      addedAt: data.added_at
+    };
+
+    res.status(201).json(newVideo);
+  } catch (error) {
+    console.error('Error adding video:', error);
+    res.status(500).json({ error: 'Failed to add video' });
   }
-
-  const videoId = extractVideoId(url);
-  if (!videoId) {
-    return res.status(400).json({ error: 'Invalid YouTube URL' });
-  }
-
-  const videos = readVideos();
-
-  // Check if video already exists
-  if (videos.find(v => v.id === videoId)) {
-    return res.status(400).json({ error: 'Video already exists' });
-  }
-
-  // Fetch video title from YouTube if not provided
-  let videoTitle = title;
-  if (!videoTitle || videoTitle.trim() === '') {
-    videoTitle = await fetchVideoTitle(videoId);
-  }
-
-  const newVideo = {
-    id: videoId,
-    title: videoTitle,
-    addedAt: new Date().toISOString()
-  };
-
-  videos.push(newVideo);
-  writeVideos(videos);
-
-  res.status(201).json(newVideo);
 });
 
 // Delete a video
-app.delete('/api/videos/:id', (req, res) => {
-  const { id } = req.params;
-  let videos = readVideos();
+app.delete('/api/videos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  const initialLength = videos.length;
-  videos = videos.filter(v => v.id !== id);
+    const { error } = await supabase
+      .from('videos')
+      .delete()
+      .eq('youtube_video_id', id);
 
-  if (videos.length === initialLength) {
-    return res.status(404).json({ error: 'Video not found' });
+    if (error) throw error;
+
+    res.json({ message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    res.status(500).json({ error: 'Failed to delete video' });
   }
-
-  writeVideos(videos);
-  res.json({ message: 'Video deleted successfully' });
 });
 
 // Update video title
-app.put('/api/videos/:id', (req, res) => {
-  const { id } = req.params;
-  const { title } = req.body;
+app.put('/api/videos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
 
-  const videos = readVideos();
-  const video = videos.find(v => v.id === id);
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
 
-  if (!video) {
-    return res.status(404).json({ error: 'Video not found' });
+    const { data, error } = await supabase
+      .from('videos')
+      .update({ title })
+      .eq('youtube_video_id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Format response
+    const updatedVideo = {
+      id: data.youtube_video_id,
+      title: data.title,
+      addedAt: data.added_at
+    };
+
+    res.json(updatedVideo);
+  } catch (error) {
+    console.error('Error updating video:', error);
+    res.status(500).json({ error: 'Failed to update video' });
   }
-
-  video.title = title || video.title;
-  writeVideos(videos);
-
-  res.json(video);
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Mobile app: http://localhost:${PORT}`);
-  console.log(`CMS: http://localhost:${PORT}/cms`);
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
 });
+
+// Start server (only in local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Mobile app: http://localhost:${PORT}`);
+    console.log(`CMS: http://localhost:${PORT}/cms`);
+  });
+}
+
+// Export for Vercel
+module.exports = app;

@@ -39,7 +39,7 @@ function renderVideos() {
       (video, index) => `
     <div class="video-card" onclick="playVideo(${index})">
       <div class="video-thumbnail">
-        <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg"
+        <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg"
              alt="${video.title}"
              onerror="this.src='https://img.youtube.com/vi/${video.id}/hqdefault.jpg'">
         <div class="play-icon"></div>
