@@ -2,12 +2,26 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/videos/:path*",
       "destination": "/api"
     },
     {
-      "source": "/(.*)",
+      "source": "/api/:path*",
       "destination": "/api"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/cms/(.*)",
+      "dest": "/cms/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|jpg|png|svg|ico))",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
     }
   ]
 }
