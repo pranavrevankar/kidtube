@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/cms/:path*",
-      "destination": "/cms/:path*"
-    }
-  ]
-}
