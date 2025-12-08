@@ -92,16 +92,19 @@ async function handleSignedIn() {
   const baseUrl = window.location.origin;
   shareLinkInput.value = `${baseUrl}/?user_id=${userId}`;
 
+  // Setup copy link button
+  copyLinkBtn.addEventListener('click', () => {
+    shareLinkInput.select();
+    document.execCommand('copy');
+    showMessage('Link copied to clipboard!', 'success');
+  });
+
+  // Setup add video form
+  addVideoForm.addEventListener('submit', handleAddVideo);
+
   // Load videos for this user
   loadVideos();
 }
-
-// Copy share link
-copyLinkBtn.addEventListener('click', () => {
-  shareLinkInput.select();
-  document.execCommand('copy');
-  showMessage('Link copied to clipboard!', 'success');
-});
 
 // Show message
 function showMessage(text, type = 'success') {
@@ -162,8 +165,8 @@ async function loadVideos() {
   }
 }
 
-// Add video
-addVideoForm.addEventListener('submit', async (e) => {
+// Add video handler
+async function handleAddVideo(e) {
   e.preventDefault();
 
   const url = videoUrlInput.value.trim();
@@ -193,7 +196,7 @@ addVideoForm.addEventListener('submit', async (e) => {
     console.error('Error adding video:', error);
     showMessage('Failed to add video', 'error');
   }
-});
+}
 
 // Delete video
 async function deleteVideo(id) {
