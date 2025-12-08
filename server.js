@@ -28,8 +28,12 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
-app.use('/cms', express.static('cms'));
+
+// Only serve static files in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static('public'));
+  app.use('/cms', express.static('cms'));
+}
 
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
