@@ -1,7 +1,5 @@
-// Only load dotenv in development
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
+// Load environment variables from .env file if it exists
+require('dotenv').config();
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -28,12 +26,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-
-// Only serve static files in development
-if (process.env.NODE_ENV !== 'production') {
-  app.use(express.static('public'));
-  app.use('/cms', express.static('cms'));
-}
+app.use(express.static('public'));
+app.use('/cms', express.static('cms'));
 
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
@@ -219,8 +213,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Start server (only in local development)
-if (process.env.NODE_ENV !== 'production') {
+// Start server (only when not running as serverless function)
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Mobile app: http://localhost:${PORT}`);
