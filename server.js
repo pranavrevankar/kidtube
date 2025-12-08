@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const { createClient } = require('@supabase/supabase-js');
+const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,11 +14,17 @@ const PORT = process.env.PORT || 3000;
 // Validate environment variables
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials!');
   console.error('SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
   console.error('SUPABASE_ANON_KEY:', supabaseKey ? 'Set' : 'Missing');
+}
+
+if (!clerkSecretKey) {
+  console.error('Missing Clerk credentials!');
+  console.error('CLERK_SECRET_KEY:', clerkSecretKey ? 'Set' : 'Missing');
 }
 
 // Initialize Supabase client
@@ -27,6 +34,27 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// Serve CMS with Clerk key injection
+app.get('/cms', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const htmlPath = path.join(__dirname, 'cms', 'index.html');
+
+  fs.readFile(htmlPath, 'utf8', (err, html) => {
+    if (err) {
+      return res.status(500).send('Error loading CMS');
+    }
+
+    // Replace ALL occurrences of placeholder with actual Clerk publishable key
+    const clerkKey = process.env.CLERK_PUBLISHABLE_KEY || '';
+    const modifiedHtml = html.replace(/CLERK_PUBLISHABLE_KEY_PLACEHOLDER/g, clerkKey);
+
+    res.send(modifiedHtml);
+  });
+});
+
+// Serve other CMS static files
 app.use('/cms', express.static('cms'));
 
 // Helper function to extract YouTube video ID from URL
@@ -73,12 +101,19 @@ function fetchVideoTitle(videoId) {
 
 // API Routes
 
-// Get all videos
+// Get all videos (filtered by user_id from query parameter)
 app.get('/api/videos', async (req, res) => {
   try {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'user_id query parameter is required' });
+    }
+
     const { data, error } = await supabase
       .from('videos')
       .select('*')
+      .eq('user_id', userId)
       .order('added_at', { ascending: false });
 
     if (error) throw error;
@@ -97,9 +132,10 @@ app.get('/api/videos', async (req, res) => {
   }
 });
 
-// Add a new video
-app.post('/api/videos', async (req, res) => {
+// Add a new video (requires authentication)
+app.post('/api/videos', ClerkExpressRequireAuth(), async (req, res) => {
   try {
+    const userId = req.auth.userId;
     const { url, title } = req.body;
 
     if (!url) {
@@ -111,15 +147,16 @@ app.post('/api/videos', async (req, res) => {
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    // Check if video already exists
+    // Check if video already exists for this user
     const { data: existing } = await supabase
       .from('videos')
       .select('youtube_video_id')
       .eq('youtube_video_id', videoId)
+      .eq('user_id', userId)
       .single();
 
     if (existing) {
-      return res.status(400).json({ error: 'Video already exists' });
+      return res.status(400).json({ error: 'Video already exists in your collection' });
     }
 
     // Fetch video title from YouTube if not provided
@@ -134,7 +171,8 @@ app.post('/api/videos', async (req, res) => {
       .insert([
         {
           youtube_video_id: videoId,
-          title: videoTitle
+          title: videoTitle,
+          user_id: userId
         }
       ])
       .select()
@@ -156,15 +194,17 @@ app.post('/api/videos', async (req, res) => {
   }
 });
 
-// Delete a video
-app.delete('/api/videos/:id', async (req, res) => {
+// Delete a video (requires authentication)
+app.delete('/api/videos/:id', ClerkExpressRequireAuth(), async (req, res) => {
   try {
+    const userId = req.auth.userId;
     const { id } = req.params;
 
     const { error } = await supabase
       .from('videos')
       .delete()
-      .eq('youtube_video_id', id);
+      .eq('youtube_video_id', id)
+      .eq('user_id', userId);
 
     if (error) throw error;
 
@@ -175,9 +215,10 @@ app.delete('/api/videos/:id', async (req, res) => {
   }
 });
 
-// Update video title
-app.put('/api/videos/:id', async (req, res) => {
+// Update video title (requires authentication)
+app.put('/api/videos/:id', ClerkExpressRequireAuth(), async (req, res) => {
   try {
+    const userId = req.auth.userId;
     const { id } = req.params;
     const { title } = req.body;
 
@@ -189,6 +230,7 @@ app.put('/api/videos/:id', async (req, res) => {
       .from('videos')
       .update({ title })
       .eq('youtube_video_id', id)
+      .eq('user_id', userId)
       .select()
       .single();
 

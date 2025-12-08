@@ -7,10 +7,36 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Clerk Sign-in Component (shown when not authenticated) -->
+  <div id="clerk-signin" class="clerk-container" style="display: none;">
+    <div id="sign-in"></div>
+  </div>
+
+  <!-- Main CMS Content (shown when authenticated) -->
+  <div id="cms-content" class="container" style="display: none;">
     <header>
-      <h1>KidTube - Video Management</h1>
-      <p class="subtitle">Add and manage YouTube videos for your little one</p>
+      <div class="header-content">
+        <div>
+          <h1>KidTube - Video Management</h1>
+          <p class="subtitle">Add and manage YouTube videos for your little one</p>
+        </div>
+        <div class="user-section">
+          <div id="user-button"></div>
+        </div>
+      </div>
+      <div class="share-link-section">
+        <p><strong>Share this link with your child:</strong></p>
+        <div class="share-link-box">
+          <input type="text" id="share-link" readonly>
+          <button id="copy-link-btn" class="btn btn-secondary">Copy Link</button>
+        </div>
+      </div>
     </header>
 
     <div class="add-video-section">
@@ -46,6 +72,16 @@
     </div>
   </div>
 
+  <!-- Load Clerk -->
+  <script>
+    window.CLERK_PUBLISHABLE_KEY = 'CLERK_PUBLISHABLE_KEY_PLACEHOLDER';
+  </script>
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="CLERK_PUBLISHABLE_KEY_PLACEHOLDER"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  ></script>
   <script src="script.js"></script>
 </body>
 </html>

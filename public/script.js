@@ -3,6 +3,7 @@ const API_URL = '/api/videos';
 let player;
 let videos = [];
 let currentVideoIndex = 0;
+let userId = null;
 
 // DOM elements
 const videoGrid = document.getElementById('video-grid');
@@ -11,15 +12,41 @@ const playerSection = document.getElementById('player-section');
 const gallerySection = document.getElementById('gallery-section');
 const closePlayerBtn = document.getElementById('close-player');
 
+// Get user_id from URL parameter
+function getUserIdFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('user_id');
+}
+
 // Load videos from API
 async function loadVideos() {
   try {
-    const response = await fetch(API_URL);
+    // Check if user_id is provided in URL
+    if (!userId) {
+      videoGrid.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      emptyState.innerHTML = `
+        <p>Welcome to KidTube!</p>
+        <small>Please ask your parent for your personalized link</small>
+      `;
+      return;
+    }
+
+    const response = await fetch(`${API_URL}?user_id=${userId}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch videos');
+    }
+
     videos = await response.json();
 
     if (videos.length === 0) {
       videoGrid.classList.add('hidden');
       emptyState.classList.remove('hidden');
+      emptyState.innerHTML = `
+        <p>No videos available yet</p>
+        <small>Ask your parent to add some videos</small>
+      `;
       return;
     }
 
@@ -28,7 +55,12 @@ async function loadVideos() {
     renderVideos();
   } catch (error) {
     console.error('Error loading videos:', error);
+    videoGrid.classList.add('hidden');
     emptyState.classList.remove('hidden');
+    emptyState.innerHTML = `
+      <p>Oops! Something went wrong</p>
+      <small>Please try refreshing the page</small>
+    `;
   }
 }
 
@@ -144,7 +176,8 @@ window.addEventListener('orientationchange', () => {
   }
 });
 
-// Load videos on page load
+// Initialize app
+userId = getUserIdFromURL();
 loadVideos();
 
 // Reload videos every 30 seconds to get updates from CMS
