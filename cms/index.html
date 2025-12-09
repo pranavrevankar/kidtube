@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KidTube - CMS</title>
+  <title>KidTube - Parent Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Loading Screen -->
@@ -15,59 +16,185 @@
 
   <!-- Clerk Sign-in Component (shown when not authenticated) -->
   <div id="clerk-signin" class="clerk-container" style="display: none;">
-    <div id="sign-in"></div>
+    <div class="signin-wrapper">
+      <div class="signin-header">
+        <h1>🎬 KidTube</h1>
+        <p>Safe YouTube viewing for kids</p>
+      </div>
+      <div id="sign-in"></div>
+    </div>
+  </div>
+
+  <!-- Onboarding Modal (shown for new users without child profile) -->
+  <div id="onboarding-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content onboarding-modal">
+      <div class="modal-header">
+        <h2>👋 Welcome to KidTube!</h2>
+        <p>Let's personalize your child's viewing experience</p>
+      </div>
+      <form id="onboarding-form" class="onboarding-form">
+        <div class="form-group">
+          <label for="child-name">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Child's Name *
+          </label>
+          <input
+            type="text"
+            id="child-name"
+            placeholder="Enter your child's name"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label for="child-dob">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Date of Birth (Optional)
+          </label>
+          <input
+            type="date"
+            id="child-dob"
+            max="2025-12-31"
+          >
+          <small>This helps us provide age-appropriate recommendations</small>
+        </div>
+        <button type="submit" class="btn btn-primary btn-large">
+          Continue
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Main CMS Content (shown when authenticated) -->
   <div id="cms-content" class="container" style="display: none;">
-    <header>
-      <div class="header-content">
-        <div>
-          <h1>KidTube - Video Management</h1>
-          <p class="subtitle">Add and manage YouTube videos for your little one</p>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <div class="nav-content">
+        <div class="logo-section">
+          <h1 id="app-title">🎬 <span id="child-name-display">KidTube</span></h1>
+          <span class="badge">Parent Dashboard</span>
         </div>
         <div class="user-section">
+          <button id="edit-profile-btn" class="btn-edit-profile" style="display: none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Profile
+          </button>
           <div id="user-button"></div>
         </div>
       </div>
-      <div class="share-link-section">
-        <p><strong>Share this link with your child:</strong></p>
-        <div class="share-link-box">
-          <input type="text" id="share-link" readonly>
-          <button id="copy-link-btn" class="btn btn-secondary">Copy Link</button>
+    </nav>
+
+    <!-- Share Link Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <h2 id="hero-title">✨ <span id="child-name-hero">Your Child's</span> Personal Video Link</h2>
+        <p id="hero-subtitle">Share this special link with <span id="child-name-subtitle">your child</span> to access their curated video collection</p>
+        <div class="share-link-container">
+          <div class="share-link-wrapper">
+            <input type="text" id="share-link" readonly>
+            <button id="copy-link-btn" class="btn-copy">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy Link
+            </button>
+          </div>
         </div>
       </div>
-    </header>
-
-    <div class="add-video-section">
-      <h2>Add New Video</h2>
-      <form id="add-video-form">
-        <div class="form-group">
-          <label for="video-url">YouTube Video URL or ID:</label>
-          <input
-            type="text"
-            id="video-url"
-            placeholder="https://www.youtube.com/watch?v=..."
-            required
-          >
-          <small>Paste the full YouTube URL or just the video ID</small>
-        </div>
-        <div class="form-group">
-          <label for="video-title">Video Title (optional):</label>
-          <input
-            type="text"
-            id="video-title"
-            placeholder="Leave empty to auto-fetch from YouTube"
-          >
-          <small>If left blank, the title will be automatically fetched from YouTube</small>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Video</button>
-      </form>
-      <div id="message" class="message"></div>
     </div>
 
-    <div class="video-list-section">
-      <h2>Current Videos (<span id="video-count">0</span>)</h2>
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Add Video Card -->
+      <div class="card add-video-card">
+        <div class="card-header">
+          <h3>➕ Add New Video</h3>
+          <p>Add YouTube videos to your child's Kidtube collection</p>
+        </div>
+        <div class="add-video-layout">
+          <form id="add-video-form" class="add-video-form">
+            <div class="form-group">
+              <label for="video-url">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                YouTube URL or Video ID
+              </label>
+              <input
+                type="text"
+                id="video-url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="video-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Custom Title (optional)
+              </label>
+              <input
+                type="text"
+                id="video-title"
+                placeholder="Auto-fetched if left empty"
+              >
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Video
+            </button>
+            <div id="message" class="message"></div>
+          </form>
+
+          <!-- Popular Videos Section (Compact) -->
+          <div class="popular-videos-compact">
+            <div class="popular-header">
+              <h4>🔥 Popular Videos</h4>
+              <span class="popular-subtitle">Quick add</span>
+            </div>
+            <div id="popular-videos-list" class="popular-videos-list">
+              <div class="loading-popular">
+                <div class="mini-spinner"></div>
+                <span>Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Library Section -->
+    <div class="library-section">
+      <div class="section-header">
+        <div>
+          <h2>📚 Video Library</h2>
+          <p>Manage your child's video collection</p>
+        </div>
+        <div class="video-count-badge">
+          <span id="video-count">0</span> videos
+        </div>
+      </div>
       <div id="video-list" class="video-grid"></div>
     </div>
   </div>

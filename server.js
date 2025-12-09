@@ -33,10 +33,12 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
 
-// Serve CMS with Clerk key injection
-app.get('/cms', (req, res) => {
+// Serve public folder for kid's view (with user_id parameter)
+app.use('/view', express.static('public'));
+
+// Serve CMS at root with Clerk key injection
+app.get('/', (req, res) => {
   const fs = require('fs');
   const path = require('path');
   const htmlPath = path.join(__dirname, 'cms', 'index.html');
@@ -55,7 +57,7 @@ app.get('/cms', (req, res) => {
 });
 
 // Serve other CMS static files
-app.use('/cms', express.static('cms'));
+app.use(express.static('cms'));
 
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
@@ -250,6 +252,144 @@ app.put('/api/videos/:id', ClerkExpressRequireAuth(), async (req, res) => {
   }
 });
 
+// Get child profile for authenticated user
+app.get('/api/child-profile', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+
+    const { data, error } = await supabase
+      .from('child_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+      throw error;
+    }
+
+    res.json(data || null);
+  } catch (error) {
+    console.error('Error fetching child profile:', error);
+    res.status(500).json({ error: 'Failed to fetch child profile' });
+  }
+});
+
+// Get child profile by user_id (public, for kid's view)
+app.get('/api/child-profile/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const { data, error } = await supabase
+      .from('child_profiles')
+      .select('child_name')  // Only return child name for privacy
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+
+    res.json(data || null);
+  } catch (error) {
+    console.error('Error fetching child profile:', error);
+    res.status(500).json({ error: 'Failed to fetch child profile' });
+  }
+});
+
+// Create or update child profile
+app.post('/api/child-profile', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+    const { child_name, date_of_birth } = req.body;
+
+    if (!child_name) {
+      return res.status(400).json({ error: 'Child name is required' });
+    }
+
+    // Check if profile exists
+    const { data: existing } = await supabase
+      .from('child_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    let result;
+    if (existing) {
+      // Update existing profile
+      result = await supabase
+        .from('child_profiles')
+        .update({
+          child_name,
+          date_of_birth,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .select()
+        .single();
+    } else {
+      // Create new profile
+      result = await supabase
+        .from('child_profiles')
+        .insert([{
+          user_id: userId,
+          child_name,
+          date_of_birth
+        }])
+        .select()
+        .single();
+    }
+
+    if (result.error) throw result.error;
+
+    res.json(result.data);
+  } catch (error) {
+    console.error('Error saving child profile:', error);
+    res.status(500).json({ error: 'Failed to save child profile' });
+  }
+});
+
+// Get popular videos (top 10 most added across all accounts)
+app.get('/api/videos/popular', async (req, res) => {
+  try {
+    // Query to get top 10 most common videos across all users
+    const { data, error } = await supabase
+      .from('videos')
+      .select('youtube_video_id, title')
+      .order('youtube_video_id');
+
+    if (error) throw error;
+
+    // Count occurrences of each video
+    const videoCounts = {};
+    data.forEach(video => {
+      if (videoCounts[video.youtube_video_id]) {
+        videoCounts[video.youtube_video_id].count++;
+      } else {
+        videoCounts[video.youtube_video_id] = {
+          id: video.youtube_video_id,
+          title: video.title,
+          count: 1
+        };
+      }
+    });
+
+    // Convert to array and sort by count
+    const popularVideos = Object.values(videoCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+      .map(video => ({
+        id: video.id,
+        title: video.title,
+        addedByCount: video.count
+      }));
+
+    res.json(popularVideos);
+  } catch (error) {
+    console.error('Error fetching popular videos:', error);
+    res.status(500).json({ error: 'Failed to fetch popular videos' });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
@@ -259,8 +399,8 @@ app.get('/api/health', (req, res) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    console.log(`Mobile app: http://localhost:${PORT}`);
-    console.log(`CMS: http://localhost:${PORT}/cms`);
+    console.log(`CMS (Parent's Dashboard): http://localhost:${PORT}`);
+    console.log(`Kid's View: http://localhost:${PORT}/view?user_id=YOUR_USER_ID`);
   });
 }
 

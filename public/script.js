@@ -1,9 +1,11 @@
 const API_URL = '/api/videos';
+const PROFILE_API_URL = '/api/child-profile';
 
 let player;
 let videos = [];
 let currentVideoIndex = 0;
 let userId = null;
+let childName = null;
 
 // DOM elements
 const videoGrid = document.getElementById('video-grid');
@@ -11,11 +13,30 @@ const emptyState = document.getElementById('empty-state');
 const playerSection = document.getElementById('player-section');
 const gallerySection = document.getElementById('gallery-section');
 const closePlayerBtn = document.getElementById('close-player');
+const appTitle = document.getElementById('app-title');
 
 // Get user_id from URL parameter
 function getUserIdFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('user_id');
+}
+
+// Load child profile
+async function loadChildProfile() {
+  if (!userId) return;
+
+  try {
+    const response = await fetch(`${PROFILE_API_URL}/${userId}`);
+    if (response.ok) {
+      const profile = await response.json();
+      if (profile && profile.child_name) {
+        childName = profile.child_name;
+        appTitle.textContent = `${childName}'s KidTube`;
+      }
+    }
+  } catch (error) {
+    console.error('Error loading child profile:', error);
+  }
 }
 
 // Load videos from API
@@ -178,6 +199,7 @@ window.addEventListener('orientationchange', () => {
 
 // Initialize app
 userId = getUserIdFromURL();
+loadChildProfile();
 loadVideos();
 
 // Reload videos every 30 seconds to get updates from CMS
