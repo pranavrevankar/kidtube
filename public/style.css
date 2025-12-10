@@ -7,7 +7,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E52D1D 0%, #FDC233 100%);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -111,7 +111,7 @@ body {
   content: '';
   width: 0;
   height: 0;
-  border-left: 20px solid #667eea;
+  border-left: 20px solid #E52D1D;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
   margin-left: 4px;

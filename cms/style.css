@@ -5,15 +5,15 @@
 }
 
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --secondary: #10b981;
-  --danger: #ef4444;
-  --danger-dark: #dc2626;
-  --background: #f8fafc;
+  --primary: #E52D1D;
+  --primary-dark: #B82218;
+  --secondary: #FDC233;
+  --danger: #E52D1D;
+  --danger-dark: #B82218;
+  --background: #F5F5F4;
   --surface: #ffffff;
-  --text: #1e293b;
-  --text-secondary: #64748b;
+  --text: #2F1B0D;
+  --text-secondary: #191816;
   --border: #e2e8f0;
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -116,7 +116,7 @@ body {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #E52D1D 0%, #FDC233 100%);
   border-radius: 1.5rem;
   padding: 3rem 2rem;
   margin: 0 2rem 2rem 2rem;
@@ -177,9 +177,9 @@ body {
 }
 
 .btn-copy:hover {
-  background: #059669;
+  background: #E5A31A;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 12px rgba(253, 194, 51, 0.4);
 }
 
 /* Content Grid */
@@ -256,7 +256,7 @@ input[type="text"] {
 input[type="text"]:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(229, 45, 29, 0.1);
 }
 
 .btn {
@@ -282,7 +282,7 @@ input[type="text"]:focus {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(229, 45, 29, 0.5);
 }
 
 .btn-danger {
@@ -364,7 +364,7 @@ input[type="text"]:focus {
 
 .popular-video-item:hover {
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 2px 8px rgba(229, 45, 29, 0.1);
 }
 
 .popular-rank {
@@ -559,7 +559,7 @@ input[type="text"]:focus {
 .video-thumbnail {
   position: relative;
   padding-bottom: 56.25%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E52D1D 0%, #FDC233 100%);
   overflow: hidden;
 }
 
@@ -635,7 +635,7 @@ input[type="text"]:focus {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #E52D1D 0%, #FDC233 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -672,7 +672,7 @@ input[type="text"]:focus {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #E52D1D 0%, #FDC233 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
