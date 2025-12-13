@@ -56,10 +56,11 @@ async function initClerk() {
     }
 
     // Listen for sign in state changes
-    clerk.addListener(({ user }) => {
-      if (user) {
-        handleSignedIn();
-      } else {
+    clerk.addListener(({ user, session }) => {
+      if (user && session) {
+        // Reload page to ensure clean state after sign-in
+        window.location.reload();
+      } else if (!user) {
         showSignIn();
       }
     });
