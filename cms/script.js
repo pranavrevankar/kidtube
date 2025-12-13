@@ -141,6 +141,9 @@ function showOnboardingModal() {
   clerkSignin.style.display = 'none';
   onboardingModal.style.display = 'flex';
 
+  // Remove the editing flag for initial onboarding
+  onboardingModal.removeAttribute('data-is-editing');
+
   // Always ensure the form has the event listener
   // (It's safe to add multiple times - we use once: true to prevent duplicates)
   console.log('Ensuring onboarding form event listener is attached');
@@ -245,10 +248,49 @@ function showCMSContent() {
 
   // Only setup event listeners and load data once
   if (!cmsSetupComplete) {
-    // Mount user button (only once)
+    // Mount user button with custom pages (only once)
     const userButtonContainer = document.getElementById('user-button');
     if (!userButtonContainer.hasChildNodes()) {
-      clerk.mountUserButton(userButtonContainer);
+      clerk.mountUserButton(userButtonContainer, {
+        afterSignOutUrl: '/'
+      });
+
+      // Listen for user button clicks and add custom menu item
+      // Use a MutationObserver to detect when the menu opens
+      const observer = new MutationObserver(() => {
+        const popover = document.querySelector('.cl-userButtonPopoverCard');
+        if (popover && !popover.querySelector('#custom-edit-profile-btn')) {
+          const actionsList = popover.querySelector('.cl-userButtonPopoverActions');
+          if (actionsList) {
+            const editProfileAction = document.createElement('button');
+            editProfileAction.id = 'custom-edit-profile-btn';
+            editProfileAction.className = 'cl-userButtonPopoverActionButton cl-userButtonPopoverActionButton__manageAccount';
+            editProfileAction.style.cssText = 'display: flex; align-items: center; width: 100%; padding: 0.5rem 1rem; text-align: left; cursor: pointer; border: none; background: none;';
+            editProfileAction.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.75rem;">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Edit Child Profile</span>
+            `;
+            editProfileAction.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openEditProfileModal();
+              // Close the popover
+              popover.style.display = 'none';
+            });
+            // Insert at the beginning of the actions list
+            actionsList.insertBefore(editProfileAction, actionsList.firstChild);
+          }
+        }
+      });
+
+      // Observe the entire document for changes
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     }
 
     // Set share link
@@ -272,26 +314,6 @@ function showCMSContent() {
       onboardingFormMounted = true;
     }
 
-    // Setup edit profile button
-    const editBtn = document.getElementById('edit-profile-btn');
-    editBtn.style.display = 'flex';
-    editBtn.addEventListener('click', () => {
-      console.log('Edit Profile button clicked');
-      console.log('Current childProfile:', childProfile);
-
-      // Pre-fill the form with current profile data
-      const nameInput = document.getElementById('child-name');
-      const dobInput = document.getElementById('child-dob');
-      console.log('Setting name input to:', childProfile.child_name);
-      console.log('Setting dob input to:', childProfile.date_of_birth);
-      nameInput.value = childProfile.child_name;
-      dobInput.value = childProfile.date_of_birth || '';
-
-      // Show the modal
-      console.log('Showing onboarding modal for editing');
-      onboardingModal.style.display = 'flex';
-    });
-
     // Setup add video form
     const addVideoForm = document.getElementById('add-video-form');
     addVideoForm.addEventListener('submit', handleAddVideo);
@@ -304,6 +326,27 @@ function showCMSContent() {
 
     cmsSetupComplete = true;
   }
+}
+
+// Open edit profile modal
+function openEditProfileModal() {
+  console.log('Edit Profile clicked from menu');
+  console.log('Current childProfile:', childProfile);
+
+  // Pre-fill the form with current profile data
+  const nameInput = document.getElementById('child-name');
+  const dobInput = document.getElementById('child-dob');
+  console.log('Setting name input to:', childProfile.child_name);
+  console.log('Setting dob input to:', childProfile.date_of_birth);
+  nameInput.value = childProfile.child_name;
+  dobInput.value = childProfile.date_of_birth || '';
+
+  // Show the modal
+  console.log('Showing onboarding modal for editing');
+  onboardingModal.style.display = 'flex';
+
+  // Mark that this is an edit operation (not initial onboarding)
+  onboardingModal.setAttribute('data-is-editing', 'true');
 }
 
 // Update personalization with child's name
@@ -565,6 +608,16 @@ async function addPopularVideo(videoId, videoTitle) {
 // Make functions available globally
 window.deleteVideo = deleteVideo;
 window.addPopularVideo = addPopularVideo;
+
+// Add click-outside-to-close for modal (only when editing, not during initial onboarding)
+onboardingModal.addEventListener('click', (e) => {
+  // Only allow closing if this is an edit operation (user already has a profile)
+  if (e.target === onboardingModal && onboardingModal.getAttribute('data-is-editing') === 'true') {
+    console.log('Clicked outside modal, closing...');
+    onboardingModal.style.display = 'none';
+    onboardingModal.removeAttribute('data-is-editing');
+  }
+});
 
 // Initialize when page loads
 if (document.readyState === 'loading') {
