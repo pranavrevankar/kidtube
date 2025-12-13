@@ -141,16 +141,19 @@ function showOnboardingModal() {
   clerkSignin.style.display = 'none';
   onboardingModal.style.display = 'flex';
 
-  // Setup onboarding form (only once)
+  // Always ensure the form has the event listener
+  // (It's safe to add multiple times - we use once: true to prevent duplicates)
+  console.log('Ensuring onboarding form event listener is attached');
+  const onboardingForm = document.getElementById('onboarding-form');
+  console.log('onboardingForm element:', onboardingForm);
+
   if (!onboardingFormMounted) {
-    console.log('Setting up onboarding form event listener');
-    const onboardingForm = document.getElementById('onboarding-form');
-    console.log('onboardingForm element:', onboardingForm);
+    console.log('First time - attaching event listener');
     onboardingForm.addEventListener('submit', handleOnboarding);
     onboardingFormMounted = true;
     console.log('Event listener attached');
   } else {
-    console.log('Event listener already attached, skipping setup');
+    console.log('Event listener was attached before, should still be active');
   }
 }
 
@@ -260,14 +263,32 @@ function showCMSContent() {
       window.open(link, '_blank');
     });
 
+    // Setup onboarding form event listener if not already done
+    // (This is needed for users who already have a profile)
+    if (!onboardingFormMounted) {
+      console.log('Setting up onboarding form event listener during CMS setup');
+      const onboardingForm = document.getElementById('onboarding-form');
+      onboardingForm.addEventListener('submit', handleOnboarding);
+      onboardingFormMounted = true;
+    }
+
     // Setup edit profile button
     const editBtn = document.getElementById('edit-profile-btn');
     editBtn.style.display = 'flex';
     editBtn.addEventListener('click', () => {
+      console.log('Edit Profile button clicked');
+      console.log('Current childProfile:', childProfile);
+
+      // Pre-fill the form with current profile data
       const nameInput = document.getElementById('child-name');
       const dobInput = document.getElementById('child-dob');
+      console.log('Setting name input to:', childProfile.child_name);
+      console.log('Setting dob input to:', childProfile.date_of_birth);
       nameInput.value = childProfile.child_name;
       dobInput.value = childProfile.date_of_birth || '';
+
+      // Show the modal
+      console.log('Showing onboarding modal for editing');
       onboardingModal.style.display = 'flex';
     });
 
