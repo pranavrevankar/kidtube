@@ -303,8 +303,12 @@ async function loadVideos() {
 async function handleAddVideo(e) {
   e.preventDefault();
 
-  const url = videoUrlInput.value.trim();
-  const title = videoTitleInput.value.trim();
+  // Get fresh references to form elements
+  const urlInput = document.getElementById('video-url');
+  const titleInput = document.getElementById('video-title');
+
+  const url = urlInput.value.trim();
+  const title = titleInput.value.trim();
 
   try {
     const response = await fetch(API_URL, {
@@ -320,8 +324,8 @@ async function handleAddVideo(e) {
 
     if (response.ok) {
       showMessage('Video added successfully!', 'success');
-      videoUrlInput.value = '';
-      videoTitleInput.value = '';
+      urlInput.value = '';
+      titleInput.value = '';
       loadVideos();
     } else {
       showMessage(data.error || 'Failed to add video', 'error');
