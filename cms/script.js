@@ -24,7 +24,7 @@ const messageDiv = document.getElementById('message');
 const videoList = document.getElementById('video-list');
 const videoCount = document.getElementById('video-count');
 const shareLinkInput = document.getElementById('share-link');
-const copyLinkBtn = document.getElementById('copy-link-btn');
+const openLinkBtn = document.getElementById('open-link-btn');
 const editProfileBtn = document.getElementById('edit-profile-btn');
 
 // Initialize Clerk
@@ -210,13 +210,12 @@ function showCMSContent() {
   const baseUrl = window.location.origin;
   shareLinkInput.value = `${baseUrl}/view?user_id=${userId}`;
 
-  // Setup copy link button (remove old listener first)
-  const newCopyBtn = copyLinkBtn.cloneNode(true);
-  copyLinkBtn.parentNode.replaceChild(newCopyBtn, copyLinkBtn);
-  document.getElementById('copy-link-btn').addEventListener('click', () => {
-    shareLinkInput.select();
-    document.execCommand('copy');
-    showMessage('Link copied to clipboard!', 'success');
+  // Setup open link button (remove old listener first)
+  const newOpenBtn = openLinkBtn.cloneNode(true);
+  openLinkBtn.parentNode.replaceChild(newOpenBtn, openLinkBtn);
+  document.getElementById('open-link-btn').addEventListener('click', () => {
+    const link = shareLinkInput.value;
+    window.open(link, '_blank');
   });
 
   // Setup edit profile button (remove old listener first)
