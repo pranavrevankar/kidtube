@@ -8,24 +8,14 @@ let sessionToken;
 let childProfile = null;
 let signInMounted = false;
 let onboardingFormMounted = false;
+let cmsSetupComplete = false;
 
-// DOM elements
+// DOM elements (cache only elements that won't be replaced)
 const loadingScreen = document.getElementById('loading-screen');
 const clerkSignin = document.getElementById('clerk-signin');
 const cmsContent = document.getElementById('cms-content');
 const onboardingModal = document.getElementById('onboarding-modal');
-const onboardingForm = document.getElementById('onboarding-form');
-const childNameInput = document.getElementById('child-name');
-const childDobInput = document.getElementById('child-dob');
-const addVideoForm = document.getElementById('add-video-form');
-const videoUrlInput = document.getElementById('video-url');
-const videoTitleInput = document.getElementById('video-title');
 const messageDiv = document.getElementById('message');
-const videoList = document.getElementById('video-list');
-const videoCount = document.getElementById('video-count');
-const shareLinkInput = document.getElementById('share-link');
-const openLinkBtn = document.getElementById('open-link-btn');
-const editProfileBtn = document.getElementById('edit-profile-btn');
 
 // Initialize Clerk
 async function initClerk() {
@@ -137,6 +127,7 @@ function showOnboardingModal() {
 
   // Setup onboarding form (only once)
   if (!onboardingFormMounted) {
+    const onboardingForm = document.getElementById('onboarding-form');
     onboardingForm.addEventListener('submit', handleOnboarding);
     onboardingFormMounted = true;
   }
@@ -207,45 +198,49 @@ function showCMSContent() {
   // Personalize UI with child's name
   updatePersonalization();
 
-  // Mount user button (only once)
-  const userButtonContainer = document.getElementById('user-button');
-  if (!userButtonContainer.hasChildNodes()) {
-    clerk.mountUserButton(userButtonContainer);
+  // Only setup event listeners and load data once
+  if (!cmsSetupComplete) {
+    // Mount user button (only once)
+    const userButtonContainer = document.getElementById('user-button');
+    if (!userButtonContainer.hasChildNodes()) {
+      clerk.mountUserButton(userButtonContainer);
+    }
+
+    // Set share link
+    const baseUrl = window.location.origin;
+    const shareLinkInput = document.getElementById('share-link');
+    shareLinkInput.value = `${baseUrl}/view?user_id=${userId}`;
+
+    // Setup open link button
+    const openLinkBtn = document.getElementById('open-link-btn');
+    openLinkBtn.addEventListener('click', () => {
+      const link = document.getElementById('share-link').value;
+      window.open(link, '_blank');
+    });
+
+    // Setup edit profile button
+    const editBtn = document.getElementById('edit-profile-btn');
+    editBtn.style.display = 'flex';
+    editBtn.addEventListener('click', () => {
+      const nameInput = document.getElementById('child-name');
+      const dobInput = document.getElementById('child-dob');
+      nameInput.value = childProfile.child_name;
+      dobInput.value = childProfile.date_of_birth || '';
+      onboardingModal.style.display = 'flex';
+    });
+
+    // Setup add video form
+    const addVideoForm = document.getElementById('add-video-form');
+    addVideoForm.addEventListener('submit', handleAddVideo);
+
+    // Load videos for this user
+    loadVideos();
+
+    // Load popular videos
+    loadPopularVideos();
+
+    cmsSetupComplete = true;
   }
-
-  // Set share link
-  const baseUrl = window.location.origin;
-  shareLinkInput.value = `${baseUrl}/view?user_id=${userId}`;
-
-  // Setup open link button (remove old listener first)
-  const newOpenBtn = openLinkBtn.cloneNode(true);
-  openLinkBtn.parentNode.replaceChild(newOpenBtn, openLinkBtn);
-  document.getElementById('open-link-btn').addEventListener('click', () => {
-    const link = shareLinkInput.value;
-    window.open(link, '_blank');
-  });
-
-  // Setup edit profile button (remove old listener first)
-  const newEditBtn = editProfileBtn.cloneNode(true);
-  editProfileBtn.parentNode.replaceChild(newEditBtn, editProfileBtn);
-  const editBtn = document.getElementById('edit-profile-btn');
-  editBtn.style.display = 'flex';
-  editBtn.addEventListener('click', () => {
-    childNameInput.value = childProfile.child_name;
-    childDobInput.value = childProfile.date_of_birth || '';
-    onboardingModal.style.display = 'flex';
-  });
-
-  // Setup add video form (remove old listener first)
-  const newForm = addVideoForm.cloneNode(true);
-  addVideoForm.parentNode.replaceChild(newForm, addVideoForm);
-  document.getElementById('add-video-form').addEventListener('submit', handleAddVideo);
-
-  // Load videos for this user
-  loadVideos();
-
-  // Load popular videos
-  loadPopularVideos();
 }
 
 // Update personalization with child's name
@@ -285,6 +280,9 @@ async function loadVideos() {
     }
 
     const videos = await response.json();
+    const videoCount = document.getElementById('video-count');
+    const videoList = document.getElementById('video-list');
+
     videoCount.textContent = videos.length;
 
     if (videos.length === 0) {
