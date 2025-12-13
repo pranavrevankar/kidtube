@@ -6,6 +6,7 @@ let clerk;
 let userId;
 let sessionToken;
 let childProfile = null;
+let signInMounted = false;
 
 // DOM elements
 const loadingScreen = document.getElementById('loading-screen');
@@ -74,11 +75,22 @@ function showSignIn() {
   clerkSignin.style.display = 'flex';
   cmsContent.style.display = 'none';
 
+  // Unmount if already mounted to avoid conflicts
+  if (signInMounted) {
+    try {
+      clerk.unmountSignIn(document.getElementById('sign-in'));
+    } catch (error) {
+      console.log('Error unmounting sign-in:', error);
+    }
+  }
+
   // Mount Clerk sign-in component
   clerk.mountSignIn(document.getElementById('sign-in'), {
     fallbackRedirectUrl: '/',
     signUpFallbackRedirectUrl: '/'
   });
+
+  signInMounted = true;
 }
 
 // Handle signed-in state
