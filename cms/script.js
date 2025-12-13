@@ -165,15 +165,22 @@ async function handleOnboarding(e) {
     });
 
     if (response.ok) {
-      childProfile = await response.json();
+      const newProfile = await response.json();
+      console.log('Profile saved successfully:', newProfile);
+      childProfile = newProfile;
       onboardingModal.style.display = 'none';
 
       // Update personalization immediately with new profile data
+      console.log('Calling updatePersonalization with:', childProfile);
       updatePersonalization();
+      console.log('Personalization updated');
 
       // Only call showCMSContent if CMS is not already displayed
       if (cmsContent.style.display === 'none') {
+        console.log('CMS was hidden, calling showCMSContent');
         showCMSContent();
+      } else {
+        console.log('CMS already visible, skipping showCMSContent');
       }
     } else {
       const data = await response.json();
@@ -188,6 +195,8 @@ async function handleOnboarding(e) {
 
 // Show CMS content with personalization
 function showCMSContent() {
+  console.log('showCMSContent called, cmsSetupComplete:', cmsSetupComplete);
+
   // Hide other screens
   loadingScreen.style.display = 'none';
   clerkSignin.style.display = 'none';
@@ -195,8 +204,15 @@ function showCMSContent() {
 
   cmsContent.style.display = 'block';
 
-  // Personalize UI with child's name
-  updatePersonalization();
+  // Only update personalization on first setup
+  // After that, updatePersonalization should be called explicitly when needed
+  if (!cmsSetupComplete) {
+    console.log('First time setup, calling updatePersonalization');
+    // Personalize UI with child's name
+    updatePersonalization();
+  } else {
+    console.log('Already setup, skipping updatePersonalization in showCMSContent');
+  }
 
   // Only setup event listeners and load data once
   if (!cmsSetupComplete) {
@@ -245,16 +261,37 @@ function showCMSContent() {
 
 // Update personalization with child's name
 function updatePersonalization() {
-  if (!childProfile || !childProfile.child_name) return;
+  console.log('updatePersonalization called with childProfile:', childProfile);
+
+  if (!childProfile || !childProfile.child_name) {
+    console.log('No childProfile or child_name, exiting');
+    return;
+  }
 
   const childName = childProfile.child_name;
+  console.log('Updating UI with name:', childName);
 
   // Update app title
-  document.getElementById('child-name-display').textContent = `${childName}'s KidTube`;
+  const displayElement = document.getElementById('child-name-display');
+  console.log('child-name-display element:', displayElement);
+  if (displayElement) {
+    displayElement.textContent = `${childName}'s KidTube`;
+    console.log('Updated child-name-display to:', displayElement.textContent);
+  }
 
   // Update hero section
-  document.getElementById('child-name-hero').textContent = `${childName}'s`;
-  document.getElementById('child-name-subtitle').textContent = childName;
+  const heroElement = document.getElementById('child-name-hero');
+  const subtitleElement = document.getElementById('child-name-subtitle');
+  console.log('hero element:', heroElement, 'subtitle element:', subtitleElement);
+
+  if (heroElement) {
+    heroElement.textContent = `${childName}'s`;
+    console.log('Updated child-name-hero to:', heroElement.textContent);
+  }
+  if (subtitleElement) {
+    subtitleElement.textContent = childName;
+    console.log('Updated child-name-subtitle to:', subtitleElement.textContent);
+  }
 }
 
 // Show message
