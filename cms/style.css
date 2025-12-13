@@ -813,8 +813,25 @@ input[type="text"]:focus {
     padding: 1rem;
   }
 
+  .nav-content {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .app-logo {
+    height: 40px;
+  }
+
+  .logo-section {
+    gap: 0.75rem;
+  }
+
+  .logo-text {
+    gap: 0.5rem;
+  }
+
   .logo-section h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .badge {
@@ -822,17 +839,34 @@ input[type="text"]:focus {
     padding: 0.25rem 0.5rem;
   }
 
+  .user-section {
+    gap: 0.75rem;
+  }
+
+  .btn-edit-profile {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.813rem;
+  }
+
+  .btn-edit-profile svg {
+    width: 12px;
+    height: 12px;
+  }
+
   .hero-section {
     padding: 2rem 1.5rem;
     margin: 0 1rem 1.5rem 1rem;
+    border-radius: 1rem;
   }
 
   .hero-content h2 {
     font-size: 1.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .hero-content > p {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
 
   .share-link-wrapper {
@@ -840,9 +874,15 @@ input[type="text"]:focus {
     gap: 0.5rem;
   }
 
+  #share-link {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+  }
+
   .btn-copy {
     width: 100%;
     justify-content: center;
+    padding: 0.75rem 1rem;
   }
 
   .content-grid {
@@ -852,10 +892,27 @@ input[type="text"]:focus {
 
   .card {
     padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .card-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .card-header p {
+    font-size: 0.875rem;
   }
 
   .library-section {
     padding: 0 1rem 2rem 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .section-header p {
+    font-size: 0.875rem;
   }
 
   .video-grid {
@@ -871,6 +928,12 @@ input[type="text"]:focus {
 
   .video-count-badge {
     align-self: flex-start;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .video-count-badge span {
+    font-size: 1.25rem;
   }
 
   .add-video-layout {
@@ -886,5 +949,291 @@ input[type="text"]:focus {
 
   .popular-videos-list {
     max-height: 300px;
+  }
+
+  .popular-header h4 {
+    font-size: 1.125rem;
+  }
+
+  /* Modal adjustments for mobile */
+  .modal-content {
+    padding: 2rem 1.5rem;
+    border-radius: 1rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .modal-header p {
+    font-size: 0.875rem;
+  }
+
+  /* Sign-in adjustments for mobile */
+  .signin-logo {
+    height: 80px;
+  }
+
+  .signin-header h1 {
+    font-size: 2rem;
+  }
+
+  .signin-header p {
+    font-size: 1rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .top-nav {
+    padding: 0.75rem;
+  }
+
+  .nav-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .logo-section {
+    width: 100%;
+  }
+
+  .app-logo {
+    height: 36px;
+  }
+
+  .logo-section h1 {
+    font-size: 1.125rem;
+  }
+
+  .user-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .btn-edit-profile {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-edit-profile span {
+    display: none;
+  }
+
+  .hero-section {
+    padding: 1.5rem 1rem;
+    margin: 0 0.75rem 1rem 0.75rem;
+  }
+
+  .hero-content h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-content > p {
+    font-size: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #share-link {
+    font-size: 0.75rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .btn-copy {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .content-grid {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .card-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  label {
+    font-size: 0.813rem;
+  }
+
+  input[type="text"],
+  input[type="date"] {
+    padding: 0.75rem;
+    font-size: 0.938rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.938rem;
+  }
+
+  .library-section {
+    padding: 0 0.75rem 1.5rem 0.75rem;
+  }
+
+  .section-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .section-header p {
+    font-size: 0.813rem;
+  }
+
+  .video-count-badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.813rem;
+  }
+
+  .video-count-badge span {
+    font-size: 1.125rem;
+  }
+
+  .video-grid {
+    gap: 0.875rem;
+  }
+
+  .video-card {
+    border-radius: 0.75rem;
+  }
+
+  .video-info {
+    padding: 1rem;
+  }
+
+  .video-title {
+    font-size: 0.938rem;
+    margin-bottom: 0.75rem;
+    min-height: 2.5rem;
+  }
+
+  .video-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .btn-danger {
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .popular-videos-compact {
+    padding-top: 1.25rem;
+  }
+
+  .popular-header h4 {
+    font-size: 1rem;
+  }
+
+  .popular-videos-list {
+    max-height: 250px;
+  }
+
+  .popular-video-item {
+    grid-template-columns: 1.25rem 45px 1fr auto;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .popular-rank {
+    font-size: 0.75rem;
+  }
+
+  .popular-thumbnail {
+    width: 45px;
+    height: 34px;
+  }
+
+  .popular-title {
+    font-size: 0.75rem;
+  }
+
+  .popular-count {
+    font-size: 0.625rem;
+  }
+
+  .btn-add-popular {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .btn-add-popular svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Modal adjustments for small mobile */
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .modal-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.375rem;
+  }
+
+  .modal-header p {
+    font-size: 0.813rem;
+  }
+
+  .btn-large {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Sign-in adjustments for small mobile */
+  .clerk-container {
+    padding: 1.5rem;
+  }
+
+  .signin-logo {
+    height: 70px;
+  }
+
+  .signin-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .signin-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .signin-header p {
+    font-size: 0.938rem;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .empty-state p {
+    font-size: 1.125rem;
+  }
+
+  .empty-state small {
+    font-size: 0.688rem;
   }
 }
