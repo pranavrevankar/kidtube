@@ -7,6 +7,7 @@ let userId;
 let sessionToken;
 let childProfile = null;
 let signInMounted = false;
+let onboardingFormMounted = false;
 
 // DOM elements
 const loadingScreen = document.getElementById('loading-screen');
@@ -134,16 +135,30 @@ function showOnboardingModal() {
   clerkSignin.style.display = 'none';
   onboardingModal.style.display = 'flex';
 
-  // Setup onboarding form
-  onboardingForm.addEventListener('submit', handleOnboarding);
+  // Setup onboarding form (only once)
+  if (!onboardingFormMounted) {
+    onboardingForm.addEventListener('submit', handleOnboarding);
+    onboardingFormMounted = true;
+  }
 }
 
 // Handle onboarding form submission
 async function handleOnboarding(e) {
   e.preventDefault();
 
-  const childName = childNameInput.value.trim();
-  const dateOfBirth = childDobInput.value || null;
+  // Get fresh references to form inputs
+  const nameInput = document.getElementById('child-name');
+  const dobInput = document.getElementById('child-dob');
+
+  const childName = nameInput.value.trim();
+  const dateOfBirth = dobInput.value || null;
+
+  console.log('Saving profile:', { childName, dateOfBirth }); // Debug log
+
+  if (!childName) {
+    alert('Please enter your child\'s name');
+    return;
+  }
 
   try {
     const response = await fetch(PROFILE_API_URL, {
@@ -164,6 +179,7 @@ async function handleOnboarding(e) {
       showCMSContent();
     } else {
       const data = await response.json();
+      console.error('Profile save error:', data);
       alert(data.error || 'Failed to save profile. Please try again.');
     }
   } catch (error) {
