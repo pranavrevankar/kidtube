@@ -59,6 +59,9 @@ app.get('/', (req, res) => {
 // Serve other CMS static files
 app.use(express.static('cms'));
 
+// Also serve public folder at root for shared assets like logos
+app.use(express.static('public'));
+
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
   const patterns = [
