@@ -37,8 +37,23 @@ app.use(bodyParser.json());
 // Serve public folder for kid's view (with user_id parameter)
 app.use('/view', express.static('public'));
 
-// Serve CMS at root with Clerk key injection
+// Serve landing page at root
 app.get('/', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const htmlPath = path.join(__dirname, 'landing', 'index.html');
+
+  fs.readFile(htmlPath, 'utf8', (err, html) => {
+    if (err) {
+      return res.status(500).send('Error loading landing page');
+    }
+
+    res.send(html);
+  });
+});
+
+// Serve CMS (Parent Dashboard) at /dashboard with Clerk key injection
+app.get('/dashboard', (req, res) => {
   const fs = require('fs');
   const path = require('path');
   const htmlPath = path.join(__dirname, 'cms', 'index.html');
@@ -55,6 +70,9 @@ app.get('/', (req, res) => {
     res.send(modifiedHtml);
   });
 });
+
+// Serve landing page static files
+app.use(express.static('landing'));
 
 // Serve other CMS static files
 app.use(express.static('cms'));
@@ -76,8 +94,16 @@ function extractVideoId(url) {
   return null;
 }
 
-// Helper function to fetch video title from YouTube oEmbed API
-function fetchVideoTitle(videoId) {
+// Blocked channels list
+const BLOCKED_CHANNELS = [
+  {
+    id: 'UCbCmjCuTUZos6Inko4u57UQ',
+    name: 'Cocomelon - Nursery Rhymes'
+  }
+];
+
+// Helper function to fetch video metadata from YouTube oEmbed API
+function fetchVideoMetadata(videoId) {
   return new Promise((resolve, reject) => {
     const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
 
@@ -91,17 +117,62 @@ function fetchVideoTitle(videoId) {
       resp.on('end', () => {
         try {
           const json = JSON.parse(data);
-          resolve(json.title || 'Untitled Video');
+          resolve({
+            title: json.title || 'Untitled Video',
+            author_name: json.author_name || '',
+            author_url: json.author_url || ''
+          });
         } catch (e) {
-          resolve('Untitled Video');
+          resolve({
+            title: 'Untitled Video',
+            author_name: '',
+            author_url: ''
+          });
         }
       });
 
     }).on('error', (err) => {
-      console.error('Error fetching video title:', err);
-      resolve('Untitled Video');
+      console.error('Error fetching video metadata:', err);
+      resolve({
+        title: 'Untitled Video',
+        author_name: '',
+        author_url: ''
+      });
     });
   });
+}
+
+// Helper function to extract channel ID from author URL
+function extractChannelId(authorUrl) {
+  // YouTube author URLs from oEmbed are typically:
+  // https://www.youtube.com/channel/UCbCmjCuTUZos6Inko4u57UQ
+  // or https://www.youtube.com/@channelhandle
+  const channelMatch = authorUrl.match(/youtube\.com\/channel\/([^\/\?]+)/);
+  if (channelMatch) {
+    return channelMatch[1];
+  }
+  return null;
+}
+
+// Helper function to check if video is from blocked channel
+function isVideoBlocked(metadata) {
+  const channelId = extractChannelId(metadata.author_url);
+
+  if (channelId) {
+    // Check if channel ID matches any blocked channel
+    const isBlocked = BLOCKED_CHANNELS.some(blocked => blocked.id === channelId);
+    if (isBlocked) {
+      return true;
+    }
+  }
+
+  // Also check by channel name as fallback
+  const authorName = metadata.author_name.toLowerCase();
+  const isBlockedByName = BLOCKED_CHANNELS.some(blocked =>
+    authorName.includes(blocked.name.toLowerCase())
+  );
+
+  return isBlockedByName;
 }
 
 // API Routes
@@ -164,11 +235,20 @@ app.post('/api/videos', ClerkExpressRequireAuth(), async (req, res) => {
       return res.status(400).json({ error: 'Video already exists in your collection' });
     }
 
-    // Fetch video title from YouTube if not provided
-    let videoTitle = title;
-    if (!videoTitle || videoTitle.trim() === '') {
-      videoTitle = await fetchVideoTitle(videoId);
+    // Fetch video metadata from YouTube
+    const metadata = await fetchVideoMetadata(videoId);
+
+    // Check if video is from a blocked channel
+    if (isVideoBlocked(metadata)) {
+      console.log(`Blocked video from channel: ${metadata.author_name} (${videoId})`);
+      return res.status(403).json({
+        error: 'This video is from a blocked channel',
+        details: `Videos from ${metadata.author_name} cannot be added to KidTube`
+      });
     }
+
+    // Use custom title if provided, otherwise use fetched title
+    const videoTitle = (title && title.trim() !== '') ? title : metadata.title;
 
     // Insert video into Supabase
     const { data, error } = await supabase
