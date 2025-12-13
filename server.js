@@ -393,6 +393,11 @@ app.get('/api/videos/popular', async (req, res) => {
   }
 });
 
+// Serve favicon.ico (redirect to PNG for compatibility)
+app.get('/favicon.ico', (req, res) => {
+  res.redirect(301, '/KidtubeLogo.png');
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
