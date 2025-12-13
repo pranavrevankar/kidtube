@@ -9,6 +9,7 @@ let childProfile = null;
 let signInMounted = false;
 let onboardingFormMounted = false;
 let cmsSetupComplete = false;
+let initialSignInComplete = false;
 
 // DOM elements (cache only elements that won't be replaced)
 const loadingScreen = document.getElementById('loading-screen');
@@ -86,11 +87,21 @@ function showSignIn() {
 
 // Handle signed-in state
 async function handleSignedIn() {
+  console.log('handleSignedIn called, initialSignInComplete:', initialSignInComplete);
+
+  // Only run the full sign-in flow once
+  if (initialSignInComplete) {
+    console.log('Initial sign-in already complete, skipping handleSignedIn');
+    return;
+  }
+
   userId = clerk.user.id;
   sessionToken = await clerk.session.getToken();
 
   // Load child profile
+  console.log('Loading child profile from database...');
   await loadChildProfile();
+  console.log('Child profile loaded:', childProfile);
 
   // Check if onboarding is needed
   if (!childProfile) {
@@ -100,6 +111,10 @@ async function handleSignedIn() {
 
   // Show CMS content
   showCMSContent();
+
+  // Mark initial sign-in as complete
+  initialSignInComplete = true;
+  console.log('Initial sign-in flow complete');
 }
 
 // Load child profile
@@ -121,15 +136,21 @@ async function loadChildProfile() {
 
 // Show onboarding modal
 function showOnboardingModal() {
+  console.log('showOnboardingModal called, onboardingFormMounted:', onboardingFormMounted);
   loadingScreen.style.display = 'none';
   clerkSignin.style.display = 'none';
   onboardingModal.style.display = 'flex';
 
   // Setup onboarding form (only once)
   if (!onboardingFormMounted) {
+    console.log('Setting up onboarding form event listener');
     const onboardingForm = document.getElementById('onboarding-form');
+    console.log('onboardingForm element:', onboardingForm);
     onboardingForm.addEventListener('submit', handleOnboarding);
     onboardingFormMounted = true;
+    console.log('Event listener attached');
+  } else {
+    console.log('Event listener already attached, skipping setup');
   }
 }
 
@@ -140,6 +161,11 @@ async function handleOnboarding(e) {
   // Get fresh references to form inputs
   const nameInput = document.getElementById('child-name');
   const dobInput = document.getElementById('child-dob');
+
+  console.log('nameInput element:', nameInput);
+  console.log('nameInput.value:', nameInput?.value);
+  console.log('dobInput element:', dobInput);
+  console.log('dobInput.value:', dobInput?.value);
 
   const childName = nameInput.value.trim();
   const dateOfBirth = dobInput.value || null;
