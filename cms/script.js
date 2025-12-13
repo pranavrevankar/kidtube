@@ -56,10 +56,9 @@ async function initClerk() {
     }
 
     // Listen for sign in state changes
-    clerk.addListener(({ user, session }) => {
+    clerk.addListener(async ({ user, session }) => {
       if (user && session) {
-        // Reload page to ensure clean state after sign-in
-        window.location.reload();
+        await handleSignedIn();
       } else if (!user) {
         showSignIn();
       }
@@ -175,35 +174,50 @@ async function handleOnboarding(e) {
 
 // Show CMS content with personalization
 function showCMSContent() {
+  // Hide other screens
+  loadingScreen.style.display = 'none';
+  clerkSignin.style.display = 'none';
+  onboardingModal.style.display = 'none';
+
   cmsContent.style.display = 'block';
 
   // Personalize UI with child's name
   updatePersonalization();
 
-  // Mount user button
-  clerk.mountUserButton(document.getElementById('user-button'));
+  // Mount user button (only once)
+  const userButtonContainer = document.getElementById('user-button');
+  if (!userButtonContainer.hasChildNodes()) {
+    clerk.mountUserButton(userButtonContainer);
+  }
 
   // Set share link
   const baseUrl = window.location.origin;
   shareLinkInput.value = `${baseUrl}/view?user_id=${userId}`;
 
-  // Setup copy link button
-  copyLinkBtn.addEventListener('click', () => {
+  // Setup copy link button (remove old listener first)
+  const newCopyBtn = copyLinkBtn.cloneNode(true);
+  copyLinkBtn.parentNode.replaceChild(newCopyBtn, copyLinkBtn);
+  document.getElementById('copy-link-btn').addEventListener('click', () => {
     shareLinkInput.select();
     document.execCommand('copy');
     showMessage('Link copied to clipboard!', 'success');
   });
 
-  // Setup edit profile button
-  editProfileBtn.style.display = 'flex';
-  editProfileBtn.addEventListener('click', () => {
+  // Setup edit profile button (remove old listener first)
+  const newEditBtn = editProfileBtn.cloneNode(true);
+  editProfileBtn.parentNode.replaceChild(newEditBtn, editProfileBtn);
+  const editBtn = document.getElementById('edit-profile-btn');
+  editBtn.style.display = 'flex';
+  editBtn.addEventListener('click', () => {
     childNameInput.value = childProfile.child_name;
     childDobInput.value = childProfile.date_of_birth || '';
     onboardingModal.style.display = 'flex';
   });
 
-  // Setup add video form
-  addVideoForm.addEventListener('submit', handleAddVideo);
+  // Setup add video form (remove old listener first)
+  const newForm = addVideoForm.cloneNode(true);
+  addVideoForm.parentNode.replaceChild(newForm, addVideoForm);
+  document.getElementById('add-video-form').addEventListener('submit', handleAddVideo);
 
   // Load videos for this user
   loadVideos();
