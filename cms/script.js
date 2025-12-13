@@ -307,8 +307,21 @@ async function handleAddVideo(e) {
   const urlInput = document.getElementById('video-url');
   const titleInput = document.getElementById('video-title');
 
+  if (!urlInput) {
+    console.error('URL input not found');
+    showMessage('Form error - please refresh the page', 'error');
+    return;
+  }
+
   const url = urlInput.value.trim();
-  const title = titleInput.value.trim();
+  const title = titleInput ? titleInput.value.trim() : '';
+
+  console.log('Adding video:', { url, title }); // Debug log
+
+  if (!url) {
+    showMessage('Please enter a YouTube URL', 'error');
+    return;
+  }
 
   try {
     const response = await fetch(API_URL, {
@@ -325,7 +338,7 @@ async function handleAddVideo(e) {
     if (response.ok) {
       showMessage('Video added successfully!', 'success');
       urlInput.value = '';
-      titleInput.value = '';
+      if (titleInput) titleInput.value = '';
       loadVideos();
     } else {
       showMessage(data.error || 'Failed to add video', 'error');
