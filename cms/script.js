@@ -76,9 +76,8 @@ function showSignIn() {
 
   // Mount Clerk sign-in component
   clerk.mountSignIn(document.getElementById('sign-in'), {
-    afterSignInUrl: '/',
-    afterSignUpUrl: '/',
-    redirectUrl: '/'
+    fallbackRedirectUrl: '/',
+    signUpFallbackRedirectUrl: '/'
   });
 }
 
