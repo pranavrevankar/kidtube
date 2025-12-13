@@ -176,7 +176,14 @@ async function handleOnboarding(e) {
     if (response.ok) {
       childProfile = await response.json();
       onboardingModal.style.display = 'none';
-      showCMSContent();
+
+      // Update personalization immediately with new profile data
+      updatePersonalization();
+
+      // Only call showCMSContent if CMS is not already displayed
+      if (cmsContent.style.display === 'none') {
+        showCMSContent();
+      }
     } else {
       const data = await response.json();
       console.error('Profile save error:', data);
