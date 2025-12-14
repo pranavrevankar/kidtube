@@ -82,13 +82,28 @@ app.use(express.static('public'));
 
 // Helper function to extract YouTube video ID from URL
 function extractVideoId(url) {
+  // Sanitize the URL first - remove zero-width spaces, trim whitespace,
+  // and normalize to prevent mobile keyboard issues
+  let sanitizedUrl = url
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
+    .trim() // Remove leading/trailing whitespace
+    .replace(/\s+/g, ''); // Remove any internal whitespace
+
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    // Standard watch URL: youtube.com/watch?v=VIDEO_ID
+    /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+    // Short URL: youtu.be/VIDEO_ID (with or without query params)
+    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    // Embed URL: youtube.com/embed/VIDEO_ID
+    /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    // Shorts URL: youtube.com/shorts/VIDEO_ID
+    /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+    // Just the video ID (11 characters)
     /^([a-zA-Z0-9_-]{11})$/
   ];
 
   for (const pattern of patterns) {
-    const match = url.match(pattern);
+    const match = sanitizedUrl.match(pattern);
     if (match) return match[1];
   }
   return null;
@@ -218,10 +233,18 @@ app.post('/api/videos', ClerkExpressRequireAuth(), async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
+    // Log the received URL for debugging (especially helpful for mobile issues)
+    console.log('Received URL:', JSON.stringify(url));
+    console.log('URL length:', url.length);
+    console.log('URL char codes:', Array.from(url).map(c => c.charCodeAt(0)).join(','));
+
     const videoId = extractVideoId(url);
     if (!videoId) {
+      console.log('Failed to extract video ID from URL:', url);
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
+
+    console.log('Extracted video ID:', videoId);
 
     // Check if video already exists for this user
     const { data: existing } = await supabase
