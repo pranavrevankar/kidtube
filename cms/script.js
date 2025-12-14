@@ -407,10 +407,17 @@ async function loadVideos() {
     }
 
     const videos = await response.json();
-    const videoCount = document.getElementById('video-count');
+    const videoCountText = document.getElementById('video-count-text');
     const videoList = document.getElementById('video-list');
+    const shareLinkInput = document.getElementById('share-link');
 
-    videoCount.textContent = videos.length;
+    // Update video count text
+    if (videos.length === 0) {
+      videoCountText.innerHTML = 'Manage your child\'s video collection';
+    } else {
+      const videoWord = videos.length === 1 ? 'video' : 'videos';
+      videoCountText.innerHTML = `You've <strong style="color: var(--primary);">${videos.length} ${videoWord}</strong> in your KidTube collection`;
+    }
 
     if (videos.length === 0) {
       videoList.innerHTML = `
@@ -426,32 +433,23 @@ async function loadVideos() {
       .map(
         (video) => `
       <div class="video-list-item" data-id="${video.id}">
-        <div class="video-list-main">
-          <div class="video-list-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-          </div>
-          <div class="video-list-content">
-            <div class="video-list-title">${video.title}</div>
-            <div class="video-list-id">ID: ${video.id}</div>
-          </div>
+        <img src="https://img.youtube.com/vi/${video.id}/default.jpg" alt="${video.title}" class="video-thumbnail">
+        <div class="video-info">
+          <div class="video-title">${video.title}</div>
         </div>
-        <div class="video-list-actions">
-          <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener noreferrer" class="btn-watch">
+        <div class="video-actions">
+          <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener noreferrer" class="btn-watch" title="Watch on YouTube">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
               <polyline points="15 3 21 3 21 9"></polyline>
               <line x1="10" y1="14" x2="21" y2="3"></line>
             </svg>
-            Watch
           </a>
-          <button class="btn btn-danger btn-delete" onclick="deleteVideo('${video.id}')">
+          <button class="btn-delete" onclick="deleteVideo('${video.id}')" title="Delete video">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            Delete
           </button>
         </div>
       </div>
@@ -470,7 +468,6 @@ async function handleAddVideo(e) {
 
   // Get fresh references to form elements
   const urlInput = document.getElementById('video-url');
-  const titleInput = document.getElementById('video-title');
 
   if (!urlInput) {
     console.error('URL input not found');
@@ -479,9 +476,8 @@ async function handleAddVideo(e) {
   }
 
   const url = urlInput.value.trim();
-  const title = titleInput ? titleInput.value.trim() : '';
 
-  console.log('Adding video:', { url, title }); // Debug log
+  console.log('Adding video:', { url }); // Debug log
 
   if (!url) {
     showMessage('Please enter a YouTube URL', 'error');
@@ -495,7 +491,7 @@ async function handleAddVideo(e) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${sessionToken}`
       },
-      body: JSON.stringify({ url, title }),
+      body: JSON.stringify({ url }),
     });
 
     const data = await response.json();
@@ -503,7 +499,6 @@ async function handleAddVideo(e) {
     if (response.ok) {
       showMessage('Video added successfully!', 'success');
       urlInput.value = '';
-      if (titleInput) titleInput.value = '';
       loadVideos();
     } else {
       showMessage(data.error || 'Failed to add video', 'error');

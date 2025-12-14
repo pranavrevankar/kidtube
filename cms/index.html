@@ -121,34 +121,39 @@
       </div>
     </nav>
 
-    <!-- Share Link Hero Section -->
-    <div class="hero-section">
-      <div class="hero-content">
-        <h2 id="hero-title">✨ <span id="child-name-hero">Your Child's</span> Personal Video Link</h2>
-        <p id="hero-subtitle">Share this special link with <span id="child-name-subtitle">your child</span> to access their curated video collection</p>
-        <div class="share-link-container">
-          <div class="share-link-wrapper">
-            <input type="text" id="share-link" readonly>
-            <button id="open-link-btn" class="btn-open">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-              Take Me There
-            </button>
-          </div>
+    <!-- KidTube Collection Section -->
+    <div class="collection-section" id="collection-section">
+      <div class="section-header">
+        <div>
+          <h2>✨ <span id="child-name-hero">Your Child's</span> KidTube Collection</h2>
+          <p id="video-count-text">Manage your child's video collection</p>
+        </div>
+      </div>
+      <div id="video-list" class="video-grid"></div>
+
+      <!-- Share Link at Bottom -->
+      <div class="share-link-footer">
+        <p class="share-link-label">Bookmark this link or add to homescreen</p>
+        <div class="share-link-wrapper">
+          <input type="text" id="share-link" readonly>
+          <button id="open-link-btn" class="btn-open">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Open my KidTube
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Grid -->
+    <!-- Add Video Card -->
     <div class="content-grid">
-      <!-- Add Video Card -->
       <div class="card add-video-card">
         <div class="card-header">
-          <h3>➕ Add New Video</h3>
-          <p>Add YouTube videos to your child's Kidtube collection</p>
+          <h3>➕ Add new video to your collection</h3>
+          <p>Go to <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="youtube-link">YouTube</a>, copy link of the YouTube video and paste below</p>
         </div>
         <div class="add-video-layout">
           <form id="add-video-form" class="add-video-form">
@@ -158,27 +163,13 @@
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
-                YouTube URL or Video ID
+                YouTube URL
               </label>
               <input
                 type="text"
                 id="video-url"
                 placeholder="https://www.youtube.com/watch?v=..."
                 required
-              >
-            </div>
-            <div class="form-group">
-              <label for="video-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                Custom Title (optional)
-              </label>
-              <input
-                type="text"
-                id="video-title"
-                placeholder="Auto-fetched if left empty"
               >
             </div>
             <button type="submit" class="btn btn-primary">
@@ -195,7 +186,7 @@
           <div class="popular-videos-compact">
             <div class="popular-header">
               <h4>🔥 Popular Videos</h4>
-              <span class="popular-subtitle">Quick add</span>
+              <span class="popular-subtitle">Quickly add popular videos added by fellow parents</span>
             </div>
             <div id="popular-videos-list" class="popular-videos-list">
               <div class="loading-popular">
@@ -206,20 +197,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Video Library Section -->
-    <div class="library-section">
-      <div class="section-header">
-        <div>
-          <h2>📚 Video Library</h2>
-          <p>Manage your child's video collection</p>
-        </div>
-        <div class="video-count-badge">
-          <span id="video-count">0</span> videos
-        </div>
-      </div>
-      <div id="video-list" class="video-grid"></div>
     </div>
   </div>
 
