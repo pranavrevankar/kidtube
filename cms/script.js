@@ -425,16 +425,34 @@ async function loadVideos() {
     videoList.innerHTML = videos
       .map(
         (video) => `
-      <div class="video-card" data-id="${video.id}">
-        <div class="video-thumbnail">
-          <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.title}">
-        </div>
-        <div class="video-info">
-          <div class="video-title">${video.title}</div>
-          <div class="video-meta">
-            <span class="video-id">${video.id}</span>
-            <button class="btn btn-danger" onclick="deleteVideo('${video.id}')">Delete</button>
+      <div class="video-list-item" data-id="${video.id}">
+        <div class="video-list-main">
+          <div class="video-list-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
           </div>
+          <div class="video-list-content">
+            <div class="video-list-title">${video.title}</div>
+            <div class="video-list-id">ID: ${video.id}</div>
+          </div>
+        </div>
+        <div class="video-list-actions">
+          <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener noreferrer" class="btn-watch">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Watch
+          </a>
+          <button class="btn btn-danger btn-delete" onclick="deleteVideo('${video.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Delete
+          </button>
         </div>
       </div>
     `
