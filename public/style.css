@@ -275,3 +275,69 @@ html {
 .loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* Pause Overlay - Covers YouTube recommendations */
+.pause-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 10;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+.pause-overlay.visible {
+  display: flex;
+  pointer-events: auto;
+}
+
+.pause-overlay-content {
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.pause-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgba(255, 255, 255, 0.5);
+}
+
+.pause-icon::before,
+.pause-icon::after {
+  content: '';
+  width: 8px;
+  height: 40px;
+  background: white;
+  border-radius: 4px;
+}
+
+.pause-icon::before {
+  margin-right: 8px;
+}
+
+.pause-overlay-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pause-overlay-hint {
+  font-size: 1rem;
+  opacity: 0.8;
+  font-weight: 400;
+}

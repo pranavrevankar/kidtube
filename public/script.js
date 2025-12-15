@@ -14,6 +14,7 @@ const playerSection = document.getElementById('player-section');
 const gallerySection = document.getElementById('gallery-section');
 const closePlayerBtn = document.getElementById('close-player');
 const appTitle = document.getElementById('app-title');
+const pauseOverlay = document.getElementById('pause-overlay');
 
 // Get user_id from URL parameter
 function getUserIdFromURL() {
@@ -143,6 +144,7 @@ function playVideo(index) {
       iv_load_policy: 3,          // Hide video annotations
       cc_load_policy: 1,          // Show closed captions by default (helpful for learning)
       color: 'red',               // Use red progress bar (more kid-friendly)
+      modestbranding: 1,          // Hide YouTube logo (reduces distractions)
       widget_referrer: window.location.href  // Track referrer for analytics
     },
     events: {
@@ -159,6 +161,13 @@ function onPlayerReady(event) {
 
 // Player state change event
 function onPlayerStateChange(event) {
+  // Show overlay when paused, hide when playing
+  if (event.data === YT.PlayerState.PAUSED) {
+    pauseOverlay.classList.add('visible');
+  } else {
+    pauseOverlay.classList.remove('visible');
+  }
+
   // When video ends (state 0), play next video
   if (event.data === YT.PlayerState.ENDED) {
     playNextVideo();
@@ -178,6 +187,17 @@ closePlayerBtn.addEventListener('click', () => {
   }
   playerSection.classList.add('hidden');
   gallerySection.style.display = 'block';
+  pauseOverlay.classList.remove('visible');
+});
+
+// Make pause overlay clickable to resume playing
+pauseOverlay.addEventListener('click', () => {
+  if (player && player.getPlayerState) {
+    const state = player.getPlayerState();
+    if (state === YT.PlayerState.PAUSED) {
+      player.playVideo();
+    }
+  }
 });
 
 // Prevent accidental navigation away
