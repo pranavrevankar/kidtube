@@ -7,9 +7,30 @@ const cors = require('cors');
 const https = require('https');
 const { createClient } = require('@supabase/supabase-js');
 const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+const Sentry = require('@sentry/node');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize Sentry (only if DSN is provided)
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 1.0, // Capture 100% of transactions for performance monitoring
+  });
+
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
+
+  console.log('Sentry initialized successfully');
+} else {
+  console.log('Sentry DSN not provided - error tracking disabled');
+}
 
 // Validate environment variables
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -52,7 +73,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Serve CMS (Parent Dashboard) at /dashboard with Clerk key injection
+// Serve CMS (Parent Dashboard) at /dashboard with Clerk key and Sentry DSN injection
 app.get('/dashboard', (req, res) => {
   const fs = require('fs');
   const path = require('path');
@@ -65,7 +86,13 @@ app.get('/dashboard', (req, res) => {
 
     // Replace ALL occurrences of placeholder with actual Clerk publishable key
     const clerkKey = process.env.CLERK_PUBLISHABLE_KEY || '';
-    const modifiedHtml = html.replace(/CLERK_PUBLISHABLE_KEY_PLACEHOLDER/g, clerkKey);
+    let modifiedHtml = html.replace(/CLERK_PUBLISHABLE_KEY_PLACEHOLDER/g, clerkKey);
+
+    // Inject Sentry DSN if available (for frontend error tracking)
+    if (process.env.SENTRY_DSN) {
+      const sentryScript = `<script>window.SENTRY_DSN = '${process.env.SENTRY_DSN}';</script>`;
+      modifiedHtml = modifiedHtml.replace('</head>', `${sentryScript}\n  <script src="sentry-init.js"></script>\n</head>`);
+    }
 
     res.send(modifiedHtml);
   });
@@ -505,6 +532,11 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
+
+// Sentry error handler must be registered before any other error middleware and after all controllers
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Start server (only when not running as serverless function)
 if (require.main === module) {
